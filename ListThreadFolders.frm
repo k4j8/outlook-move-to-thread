@@ -13,25 +13,25 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Created by Kyle Johnston on 2019-05-02
-' Last update: 2019-05-08
+' Modified by Kyle Johnston on 2019-05-02
+' Last update: 2019-05-16
 
 Public Sub UserForm_Initialize()
 
-GetConverstationInformation
+    GetConverstationInformation
 
 End Sub
 
 Public Sub GetConverstationInformation()
 
-' https://stackoverflow.com/questions/29304844/outlook-2010-vba-to-save-selected-email-to-a-folder-other-emails-in-that-convers?rq=1
+    ' Original code obtained from the following site (credit user TimO):
+    ' https://stackoverflow.com/questions/29304844/outlook-2010-vba-to-save-selected-email-to-a-folder-other-emails-in-that-convers?rq=1
 
-' Get root items in conversation
+    ' Get root items in conversation
 
     Dim host As Outlook.Application
     Set host = ThisOutlookSession.Application
 
-    ' Check for Outlook 2010
     Dim selectedItem As Object
     Dim theMailItem As Outlook.mailItem
 
@@ -119,6 +119,9 @@ End Sub
 
 Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.conversation)
 
+    ' Original code obtained from the following site (credit user TimO):
+    ' https://stackoverflow.com/questions/29304844/outlook-2010-vba-to-save-selected-email-to-a-folder-other-emails-in-that-convers?rq=1
+
     ' From the root items, find all the messages and add to ListBox1
 
     Dim group As Outlook.simpleItems
@@ -158,21 +161,23 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
             GetConversationDetails mi, theConversation
         Next obj
     End If
+
 End Sub
 
 Private Sub ListBox1_Click()
 
-' Move mail to selected folder
-Call MoveMail(Me.ListBox1.Value)
+    ' Move mail to selected folder
+    Call MoveMail(Me.ListBox1.Value)
 
-' Close UserForm
-Unload Me
+    ' Close UserForm
+    Unload Me
 
 End Sub
 
 Sub MoveMail(inputfolder As String)
 
-' https://www.slipstick.com/outlook/macro-move-folder/
+    ' Original code obtained from the following site (credit Diane Poremsky):
+    ' https://www.slipstick.com/outlook/macro-move-folder/
 
     Dim objOutlook As Outlook.Application
     Dim objNamespace As Outlook.NameSpace
@@ -195,13 +200,15 @@ Sub MoveMail(inputfolder As String)
     Next
 
     Set objDestFolder = Nothing
+
 End Sub
 
 Function GetFolder(ByVal FolderPath As String) As Outlook.folder
 
-' https://docs.microsoft.com/en-us/office/vba/outlook/how-to/items-folders-and-stores/obtain-a-folder-object-from-a-folder-path
+    ' Original code obtained from the following site (credit users "office 365 dev account", "Office GSX", Kim Brandl - MSFT, JiayueHu):
+    ' https://docs.microsoft.com/en-us/office/vba/outlook/how-to/items-folders-and-stores/obtain-a-folder-object-from-a-folder-path
 
-' Convert folder path in form of "\\folder1\folder2\folder3" to a folder object
+    ' Convert folder path in form of "\\folder1\folder2\folder3" to a folder object
 
     Dim TestFolder As Outlook.folder
     Dim FoldersArray As Variant
@@ -233,4 +240,5 @@ Function GetFolder(ByVal FolderPath As String) As Outlook.folder
 GetFolder_Error:
     Set GetFolder = Nothing
     Exit Function
+
 End Function
