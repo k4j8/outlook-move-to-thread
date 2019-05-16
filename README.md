@@ -14,7 +14,7 @@ Import files by selecting "File" then "Import File...". Import `ListThread.bas` 
 Run `LoadUserForm` in `ListThread.bas` to start the macro. It is recommended to create a toolbar shortcut button to this subroutine.
 
 ## Contributing
-Pull requests, issues, and feature suggestions are welcome.
+Pull requests, issues, and feature suggestions are welcome. All code in pull requests must be tested in Outlook and exported directly from the program to ensure import compatibility.
 
 ## Acknowledgements
 Much of the code has been copied and edited from various sites and forums. Credit to original sources is given in the code where applicable.
