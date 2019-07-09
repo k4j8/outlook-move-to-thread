@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} ListThreadFolders
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} ListThreadFolders 
    Caption         =   "Select folder to move emails to"
    ClientHeight    =   3015
    ClientLeft      =   120
@@ -13,8 +13,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 ' Created by Kyle Johnston on 2019-05-02
-' Last update: 2019-07-08
+' Last update: 2019-07-09
 
 Public Sub UserForm_Initialize()
 
@@ -32,11 +33,11 @@ Public Sub GetConverstationInformation()
     Dim host As Outlook.Application
     Set host = ThisOutlookSession.Application
 
-    ' Get the user's currently selected item.
+    ' Get the user's currently selected item
     Set selectedItem = host.ActiveExplorer.Selection.item(1)
+    Debug.Print ("Selected item: " & selectedItem)
 
-    ' Check to see that the item's current folder
-    ' has conversations enabled.
+    ' Check to see that the item's current folder has conversations enabled
     Dim parentFolder As Outlook.folder
     Dim parentStore As Outlook.store
     Set parentFolder = selectedItem.Parent
@@ -46,42 +47,54 @@ Public Sub GetConverstationInformation()
         Dim theConversation As Outlook.conversation
         Set theConversation = selectedItem.GetConversation
         If Not IsNull(theConversation) Then
-            ' Outlook provides a table object
-            ' the contains all of the items in the
-            ' conversation.
+            ' Outlook provides a table object the contains all of the items in the conversation
             Dim itemsTable As Outlook.table
             Set itemsTable = theConversation.GetTable
 
             ' Get the Root Items
             ' Enumerate the list of items
-            ' Then use a helper method and recursion
-            ' to walk all the items in the conversation.
+            ' Then use a helper method and recursion to walk all the items in the conversation
             Dim group As Outlook.simpleItems
             Set group = theConversation.GetRootItems
-            Dim obj As Object
-            Dim fld As Outlook.folder
+            Dim obj As Object ' an email
+            Dim fld As Outlook.folder ' full path to the folder the email is in (\\AcountName\Folder)
+            Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)
             Dim IsInListBox As Boolean
             For Each obj In group
                 If TypeOf obj Is Outlook.mailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
                     ' If ROOT item is an email, add it to ListBox1
+
                     Set fld = obj.Parent
+                    Debug.Print ("fld.FolderPath: " & fld.FolderPath & " (" & TypeName(obj) & ")")
 
-                    ' Don't include duplicate folders
-                    IsInListBox = False
-                    For i = 0 To Me.ListBox1.ListCount - 1
-                        If Me.ListBox1.Column(0, i) = fld.FolderPath Then
-                            IsInListBox = True
+                    ' Don't include generic folders
+                    sfld = Mid(fld.FolderPath, InStr(3, fld.FolderPath, "\") + 1)
+                    If (sfld <> "Inbox") And _
+                        (sfld <> "Sent Items") And _
+                        (sfld <> "Calendar") Then
+
+                        ' Make IsInListBox true if folder has already been added
+                        IsInListBox = False
+                        For i = 0 To Me.ListBox1.ListCount - 1
+                            If Me.ListBox1.Column(0, i) = fld.FolderPath Then
+                                IsInListBox = True
+                            End If
+                        Next
+
+                        If (IsInListBox = False) Then
+                            Me.ListBox1.AddItem fld.FolderPath
+                            Debug.Print ("Added " & fld.FolderPath & " to ListBox")
                         End If
-                    Next
 
-                    If (InStr(fld.FolderPath, "Inbox") = 0) And _
-                        (InStr(fld.FolderPath, "Sent Items") = 0) And _
-                        (InStr(fld.FolderPath, "Calendar") = 0) And _
-                        (IsInListBox = False) Then
-                        Me.ListBox1.AddItem fld.FolderPath
                     End If
+
+                Else
+                    Debug.Print ("Skipping obj of type " & TypeName(obj))
                 End If
-                    GetConversationDetails obj, theConversation
+
+                ' Repeat the process if this email is also a root item
+                GetConversationDetails obj, theConversation
+
             Next obj
         Else
             MsgBox "The currently selected item is not a part of a conversation."
@@ -90,6 +103,7 @@ Public Sub GetConverstationInformation()
         MsgBox "The currently selected item is not in a folder with conversations enabled."
     End If
 
+    ' Display message box and/or move emails
     If Me.ListBox1.ListCount = 0 Then
         ' Don't open the window
         MsgBox ("No folders found")
@@ -115,21 +129,25 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
     Set group = theConversation.GetChildren(anItem)
 
     If group.Count > 0 Then
-        Dim obj As Object
-        Dim fld As Outlook.folder
-        Dim i As Integer
+        Debug.Print ("Getting conversation details...")
+        Dim obj As Object ' an email
+        Dim fld As Outlook.folder ' full path to the folder the email is in (\\AcountName\Folder)
+        Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)        Dim i As Integer
         Dim IsInListBox As Boolean
         For Each obj In group
             If TypeOf obj Is Outlook.mailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
                 ' If CHILD item is an email, add it to ListBox1
+
                 Set fld = obj.Parent
+                Debug.Print ("  fld.FolderPath: " & fld.FolderPath & " (" & TypeName(obj) & ")")
 
                 ' Don't include generic folders
-                If (InStr(fld.FolderPath, "Inbox") = 0) And _
-                    (InStr(fld.FolderPath, "Sent Items") = 0) And _
-                    (InStr(fld.FolderPath, "Calendar") = 0) Then
+                sfld = Mid(fld.FolderPath, InStr(3, fld.FolderPath, "\") + 1)
+                If (sfld <> "Inbox") And _
+                    (sfld <> "Sent Items") And _
+                    (sfld <> "Calendar") Then
 
-                    ' Don't include duplicate folders
+                    ' Make IsInListBox true if folder has already been added
                     IsInListBox = False
                     For i = 0 To Me.ListBox1.ListCount - 1
                         If Me.ListBox1.Column(0, i) = fld.FolderPath Then
@@ -137,14 +155,21 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
                         End If
                     Next
 
-                    ' Add to ListBox1
+                    ' Add folder to ListBox if IsInListBox is false
                     If IsInListBox = False Then
                         Me.ListBox1.AddItem fld.FolderPath
+                        Debug.Print ("  Added " & fld.FolderPath & " to ListBox")
                     End If
 
                 End If
+
+            Else
+                Debug.Print ("  Skipping obj of type " & TypeName(obj))
             End If
+
+            ' Repeat the process if this email is also a root item
             GetConversationDetails obj, theConversation
+
         Next obj
     End If
 
@@ -181,6 +206,9 @@ Sub MoveMail(inputfolder As String)
         ' Move folder if destination is different than current
         If objItem.Parent <> objDestFolder Then
             objItem.Move objDestFolder
+            Debug.Print ("Moved '" & objItem & "' to '" & objDestFolder & "'")
+        Else
+            Debug.Print ("Skipped moving '" & objItem & "' to '" & objDestFolder & "' (same folder)")
         End If
 
     Next
