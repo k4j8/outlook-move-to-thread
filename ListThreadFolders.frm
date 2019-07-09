@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} ListThreadFolders 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} ListThreadFolders
    Caption         =   "Select folder to move emails to"
    ClientHeight    =   3015
    ClientLeft      =   120
@@ -13,8 +13,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Modified by Kyle Johnston on 2019-05-02
-' Last update: 2019-05-16
+' Created by Kyle Johnston on 2019-05-02
+' Last update: 2019-07-08
 
 Public Sub UserForm_Initialize()
 
@@ -32,75 +32,62 @@ Public Sub GetConverstationInformation()
     Dim host As Outlook.Application
     Set host = ThisOutlookSession.Application
 
-    Dim selectedItem As Object
-    Dim theMailItem As Outlook.mailItem
-
     ' Get the user's currently selected item.
     Set selectedItem = host.ActiveExplorer.Selection.item(1)
 
-    ' Check to see if the item is a MailItem.
-    If TypeOf selectedItem Is Outlook.mailItem Then
-        Set theMailItem = selectedItem
-        ' Check to see that the item's current folder
-        ' has conversations enabled.
-        Dim parentFolder As Outlook.folder
-        Dim parentStore As Outlook.store
-        Set parentFolder = theMailItem.Parent
-        Set parentStore = parentFolder.store
-        If parentStore.IsConversationEnabled Then
-            ' Try and get the conversation.
-            Dim theConversation As Outlook.conversation
-            Set theConversation = theMailItem.GetConversation
-            If Not IsNull(theConversation) Then
-                ' Outlook provides a table object
-                ' the contains all of the items in the
-                ' conversation.
-                Dim itemsTable As Outlook.table
-                Set itemsTable = theConversation.GetTable
+    ' Check to see that the item's current folder
+    ' has conversations enabled.
+    Dim parentFolder As Outlook.folder
+    Dim parentStore As Outlook.store
+    Set parentFolder = selectedItem.Parent
+    Set parentStore = parentFolder.store
+    If parentStore.IsConversationEnabled Then
+        ' Try and get the conversation.
+        Dim theConversation As Outlook.conversation
+        Set theConversation = selectedItem.GetConversation
+        If Not IsNull(theConversation) Then
+            ' Outlook provides a table object
+            ' the contains all of the items in the
+            ' conversation.
+            Dim itemsTable As Outlook.table
+            Set itemsTable = theConversation.GetTable
 
-                ' Get the Root Items
-                ' Enumerate the list of items
-                ' only writing out data for MailItems.
-                ' A conversation can contain other items
-                ' like MeetingItems.
-                ' Then use a helper method and recursion
-                ' to walk all the items in the conversation.
-                Dim group As Outlook.simpleItems
-                Set group = theConversation.GetRootItems
-                Dim obj As Object
-                Dim fld As Outlook.folder
-                Dim mi As Outlook.mailItem
-                Dim IsInListBox As Boolean
-                For Each obj In group
-                    If TypeOf obj Is Outlook.mailItem Then
-                        ' If ROOT item is an email, add it to ListBox1
-                        Set mi = obj
-                        Set fld = mi.Parent
+            ' Get the Root Items
+            ' Enumerate the list of items
+            ' Then use a helper method and recursion
+            ' to walk all the items in the conversation.
+            Dim group As Outlook.simpleItems
+            Set group = theConversation.GetRootItems
+            Dim obj As Object
+            Dim fld As Outlook.folder
+            Dim IsInListBox As Boolean
+            For Each obj In group
+                If TypeOf obj Is Outlook.mailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
+                    ' If ROOT item is an email, add it to ListBox1
+                    Set fld = obj.Parent
 
-                        ' Don't include duplicate folders
-                        IsInListBox = False
-                        For i = 0 To Me.ListBox1.ListCount - 1
-                            If Me.ListBox1.Column(0, i) = fld.FolderPath Then
-                                IsInListBox = True
-                            End If
-                        Next
-
-                        If (InStr(fld.FolderPath, "Inbox") = 0) And _
-                            (InStr(fld.FolderPath, "Sent Items") = 0) And _
-                            (IsInListBox = False) Then
-                            Me.ListBox1.AddItem fld.FolderPath
+                    ' Don't include duplicate folders
+                    IsInListBox = False
+                    For i = 0 To Me.ListBox1.ListCount - 1
+                        If Me.ListBox1.Column(0, i) = fld.FolderPath Then
+                            IsInListBox = True
                         End If
+                    Next
+
+                    If (InStr(fld.FolderPath, "Inbox") = 0) And _
+                        (InStr(fld.FolderPath, "Sent Items") = 0) And _
+                        (InStr(fld.FolderPath, "Calendar") = 0) And _
+                        (IsInListBox = False) Then
+                        Me.ListBox1.AddItem fld.FolderPath
                     End If
-                        GetConversationDetails mi, theConversation
-                Next obj
-            Else
-                MsgBox "The currently selected item is not a part of a conversation."
-            End If
+                End If
+                    GetConversationDetails obj, theConversation
+            Next obj
         Else
-            MsgBox "The currently selected item is not in a folder with conversations enabled."
+            MsgBox "The currently selected item is not a part of a conversation."
         End If
     Else
-        MsgBox "The currently selected item is not a mail item."
+        MsgBox "The currently selected item is not in a folder with conversations enabled."
     End If
 
     If Me.ListBox1.ListCount = 0 Then
@@ -130,18 +117,17 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
     If group.Count > 0 Then
         Dim obj As Object
         Dim fld As Outlook.folder
-        Dim mi As Outlook.mailItem
         Dim i As Integer
         Dim IsInListBox As Boolean
         For Each obj In group
-            If TypeOf obj Is Outlook.mailItem Then
+            If TypeOf obj Is Outlook.mailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
                 ' If CHILD item is an email, add it to ListBox1
-                Set mi = obj
-                Set fld = mi.Parent
+                Set fld = obj.Parent
 
                 ' Don't include generic folders
                 If (InStr(fld.FolderPath, "Inbox") = 0) And _
-                    (InStr(fld.FolderPath, "Sent Items") = 0) Then
+                    (InStr(fld.FolderPath, "Sent Items") = 0) And _
+                    (InStr(fld.FolderPath, "Calendar") = 0) Then
 
                     ' Don't include duplicate folders
                     IsInListBox = False
@@ -158,7 +144,7 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
 
                 End If
             End If
-            GetConversationDetails mi, theConversation
+            GetConversationDetails obj, theConversation
         Next obj
     End If
 
@@ -242,5 +228,3 @@ GetFolder_Error:
     Exit Function
 
 End Function
-
-
