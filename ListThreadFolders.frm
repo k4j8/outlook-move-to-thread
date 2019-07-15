@@ -13,9 +13,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 ' Created by Kyle Johnston on 2019-05-02
-' Last update: 2019-07-09
+' Last update: 2019-07-12
 
 Public Sub UserForm_Initialize()
 
@@ -35,7 +34,7 @@ Public Sub GetConverstationInformation()
 
     ' Get the user's currently selected item
     Set selectedItem = host.ActiveExplorer.Selection.item(1)
-    Debug.Print ("Selected item: " & selectedItem)
+    Debug.Print ("Selected item: " & selectedItem.ConversationTopic)
 
     ' Check to see that the item's current folder has conversations enabled
     Dim parentFolder As Outlook.folder
@@ -71,7 +70,8 @@ Public Sub GetConverstationInformation()
                     sfld = Mid(fld.FolderPath, InStr(3, fld.FolderPath, "\") + 1)
                     If (sfld <> "Inbox") And _
                         (sfld <> "Sent Items") And _
-                        (sfld <> "Calendar") Then
+                        (sfld <> "Calendar") And _
+                        (InStr(sfld, "Shared Data") = 0) Then
 
                         ' Make IsInListBox true if folder has already been added
                         IsInListBox = False
@@ -145,7 +145,8 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
                 sfld = Mid(fld.FolderPath, InStr(3, fld.FolderPath, "\") + 1)
                 If (sfld <> "Inbox") And _
                     (sfld <> "Sent Items") And _
-                    (sfld <> "Calendar") Then
+                    (sfld <> "Calendar") And _
+                    (InStr(sfld, "Shared Data") = 0) Then
 
                     ' Make IsInListBox true if folder has already been added
                     IsInListBox = False
@@ -206,9 +207,9 @@ Sub MoveMail(inputfolder As String)
         ' Move folder if destination is different than current
         If objItem.Parent <> objDestFolder Then
             objItem.Move objDestFolder
-            Debug.Print ("Moved '" & objItem & "' to '" & objDestFolder & "'")
+            Debug.Print ("Moved '" & objItem.ConversationTopic & "' to '" & objDestFolder.name & "'")
         Else
-            Debug.Print ("Skipped moving '" & objItem & "' to '" & objDestFolder & "' (same folder)")
+            Debug.Print ("Skipped moving '" & objItem.ConversationTopic & "' to '" & objDestFolder.name & "' (same folder)")
         End If
 
     Next
