@@ -3,11 +3,11 @@ Microsoft Outlook VBA to move emails to the same folder as the rest of the email
 
 When this macro is run within the main window of Microsoft Outlook, the user will be prompted with a pop-up containing a list of folders that emails within the thread already reside in, excluding default folders such as "Inbox" and "Sent Items". The user picks a folder from the list and emails will be moved to the selected folder.
 
-![Example of selecting the folder](select_folder.png)
+![Example of selecting the folder](images/select_folder.png)
 
 If there would only be one folder in the list, then the emails will be moved without prompting the user and the macro displays a message box confirming the move.
 
-![Example of moving emails](moved_emails.png)
+![Example of moving emails](images/moved_emails.png)
 
 ## Installation
 Open Outlook VBA window using a method such as Alt+F11.
