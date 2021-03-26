@@ -1,7 +1,4 @@
 Attribute VB_Name = "ListThread"
-' Modified by Kyle Johnston in 2018
-' Last update: 2019-07-12
-
 ' Displays a list of folders that other messages in the conversation belong to
 ' Clicking on a folder moves the messages to that folder
 

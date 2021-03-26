@@ -18,7 +18,7 @@ Import files by selecting "File" then "Import File...". Import `ListThread.bas` 
 Run `LoadUserForm` in `ListThread.bas` to start the macro. It is recommended to create a toolbar shortcut button to this subroutine.
 
 ## Limitations
-At this stage, folder names need to have only ASCII caracters for the macro to run properly.
+The macro crashes if certain symbols such as the percent sign (%) or backslash (\\) are within a folder name.
 
 ## Contributing
 Pull requests, issues, and feature suggestions are welcome. All code in pull requests must be tested in Outlook and exported directly from the program to ensure import compatibility.

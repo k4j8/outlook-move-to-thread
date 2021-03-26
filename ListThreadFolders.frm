@@ -13,9 +13,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Created by Kyle Johnston on 2019-05-02
-' Last update: 2019-07-12
-
 Public Sub UserForm_Initialize()
 
     GetConverstationInformation
@@ -53,37 +50,39 @@ Public Sub GetConverstationInformation()
             ' Get the Root Items
             ' Enumerate the list of items
             ' Then use a helper method and recursion to walk all the items in the conversation
-            Dim group As Outlook.simpleItems
+            Dim group As Outlook.SimpleItems
             Set group = theConversation.GetRootItems
             Dim obj As Object ' an email
             Dim fld As Outlook.folder ' full path to the folder the email is in (\\AcountName\Folder)
             Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)
             Dim IsInListBox As Boolean
             For Each obj In group
-                If TypeOf obj Is Outlook.mailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
+                If TypeOf obj Is Outlook.MailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
                     ' If ROOT item is an email, add it to ListBox1
 
                     Set fld = obj.Parent
-                    Debug.Print ("fld.FolderPath: " & fld.FolderPath & " (" & TypeName(obj) & ")")
+                    FolderPathEncoded = Replace(fld.FolderPath, "%2F", "/")
+                    Debug.Print ("FolderPathEncoded: " & FolderPathEncoded & " (" & TypeName(obj) & ")")
 
                     ' Don't include generic folders
-                    sfld = Mid(fld.FolderPath, InStr(3, fld.FolderPath, "\") + 1)
+                    sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
                     If (sfld <> "Inbox") And _
                         (sfld <> "Sent Items") And _
                         (sfld <> "Calendar") And _
+                        (sfld <> "Auto Replies") And _
                         (InStr(sfld, "Shared Data") = 0) Then
 
                         ' Make IsInListBox true if folder has already been added
                         IsInListBox = False
                         For i = 0 To Me.ListBox1.ListCount - 1
-                            If Me.ListBox1.Column(0, i) = fld.FolderPath Then
+                            If Me.ListBox1.Column(0, i) = FolderPathEncoded Then
                                 IsInListBox = True
                             End If
                         Next
 
                         If (IsInListBox = False) Then
-                            Me.ListBox1.AddItem fld.FolderPath
-                            Debug.Print ("Added " & fld.FolderPath & " to ListBox")
+                            Me.ListBox1.AddItem FolderPathEncoded
+                            Debug.Print ("Added " & FolderPathEncoded & " to ListBox")
                         End If
 
                     End If
@@ -125,7 +124,7 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
 
     ' From the root items, find all the messages and add to ListBox1
 
-    Dim group As Outlook.simpleItems
+    Dim group As Outlook.SimpleItems
     Set group = theConversation.GetChildren(anItem)
 
     If group.Count > 0 Then
@@ -135,31 +134,33 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
         Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)        Dim i As Integer
         Dim IsInListBox As Boolean
         For Each obj In group
-            If TypeOf obj Is Outlook.mailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
+            If TypeOf obj Is Outlook.MailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
                 ' If CHILD item is an email, add it to ListBox1
 
                 Set fld = obj.Parent
-                Debug.Print ("  fld.FolderPath: " & fld.FolderPath & " (" & TypeName(obj) & ")")
+                FolderPathEncoded = Replace(fld.FolderPath, "%2F", "/")
+                Debug.Print ("  FolderPathEncoded: " & FolderPathEncoded & " (" & TypeName(obj) & ")")
 
                 ' Don't include generic folders
-                sfld = Mid(fld.FolderPath, InStr(3, fld.FolderPath, "\") + 1)
+                sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
                 If (sfld <> "Inbox") And _
                     (sfld <> "Sent Items") And _
                     (sfld <> "Calendar") And _
+                    (sfld <> "Auto Replies") And _
                     (InStr(sfld, "Shared Data") = 0) Then
 
                     ' Make IsInListBox true if folder has already been added
                     IsInListBox = False
                     For i = 0 To Me.ListBox1.ListCount - 1
-                        If Me.ListBox1.Column(0, i) = fld.FolderPath Then
+                        If Me.ListBox1.Column(0, i) = FolderPathEncoded Then
                             IsInListBox = True
                         End If
                     Next
 
                     ' Add folder to ListBox if IsInListBox is false
                     If IsInListBox = False Then
-                        Me.ListBox1.AddItem fld.FolderPath
-                        Debug.Print ("  Added " & fld.FolderPath & " to ListBox")
+                        Me.ListBox1.AddItem FolderPathEncoded
+                        Debug.Print ("  Added " & FolderPathEncoded & " to ListBox")
                     End If
 
                 End If
@@ -195,7 +196,7 @@ Sub MoveMail(inputfolder As String)
     Dim objNamespace As Outlook.NameSpace
     Dim objSourceFolder As Outlook.MAPIFolder
     Dim objDestFolder As Outlook.MAPIFolder
-    Dim objItems As mailItem
+    Dim objItems As MailItem
 
     Set objOutlook = Application
     Set objNamespace = objOutlook.GetNamespace("MAPI")
