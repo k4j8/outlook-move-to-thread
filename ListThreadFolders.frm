@@ -67,6 +67,7 @@ Public Sub GetConverstationInformation()
                     ' Don't include generic folders
                     sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
                     If (sfld <> "Inbox") And _
+                        (sfld <> "Drafts") And _
                         (sfld <> "Sent Items") And _
                         (sfld <> "Calendar") And _
                         (sfld <> "Auto Replies") And _
@@ -144,6 +145,7 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
                 ' Don't include generic folders
                 sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
                 If (sfld <> "Inbox") And _
+                    (sfld <> "Drafts") And _
                     (sfld <> "Sent Items") And _
                     (sfld <> "Calendar") And _
                     (sfld <> "Auto Replies") And _
