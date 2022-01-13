@@ -14,8 +14,36 @@ Open Outlook VBA window using a method such as Alt+F11.
 
 Import files by selecting "File" then "Import File...". Import `ListThread.bas` and `ListThreadFolders.frm`. `ListThreadFolders.frx` must be in the same directory as `ListThreadFolders.frm` when it is imported.
 
+### Signing the Macro
+
+If you receive a warning saying, "The macros in this project are disabled," you probably have security settings that only allow signed macros. 
+
+To do this, follow the [Digitally sign your macro project](https://support.microsoft.com/en-us/office/digitally-sign-your-macro-project-956e9cc8-bbf6-4365-8bfa-98505ecd1c01) article from Microsoft.
+
+After signing and saving the project, you will have to restart Outlook. You may get a warning because the certificate is self-signed (depending on your security settings). If you trust the Publisher (yourself), the notice will not appear again.
+
 ## Usage
-Run `LoadUserForm` in `ListThread.bas` to start the macro. It is recommended to create a toolbar shortcut button to this subroutine.
+Run `LoadUserForm` in `ListThread.bas` to start the macro. 
+
+### User-friendly usage
+
+Create a ribbon shortcut button to this subroutine:
+
+1. In Outlook, go to "File" -> "Options" -> "Customize Ribbon".
+
+2. Pick "Macros" in "Choose commands from:"" and select "Project1.LoadUserForm".
+
+3. Decide where to add it and rename it (optional)
+
+For example, creating a "New Group" in "Home (mail)," called ``Organize``. I also did "Rename..."" to ``Archive to folder`` and picked a new icon.
+
+![Outlook Options to create a ribbon button](images/example_outlook_options.png)
+
+The ribbon will look like this:
+
+![Outlook ribbon example](images/example_outlook_ribbon.png)
+
+Note: If the button stops working the following day or after a restart, macros are probably disabled. Open Outlook VBA (Alt+F11) and run from there (F5). If you get the error stated in [Signing the Macro](#signing-the-macro), follow the steps to sign the code digitally.
 
 ## Limitations
 The macro crashes if certain symbols such as the percent sign (%) or backslash (\\) are within a folder name.
