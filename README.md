@@ -45,6 +45,16 @@ The ribbon will look like this:
 
 Note: If the button stops working the following day or after a restart, macros are probably disabled. Open Outlook VBA (Alt+F11) and run from there (F5). If you get the error stated in [Signing the Macro](#signing-the-macro), follow the steps to sign the code digitally.
 
+## Localization
+
+The macro was developed for English mailboxes and excludes default folders. This means it will ignore "Sent Items" but not "Posta inviata" (Italian for sent items).  
+
+At this moment, default folders work in:
+- English
+- Portuguese (PT)
+
+See the [commit for pt/pt](https://github.com/NBajanca/outlook-move-to-thread/commit/7cdab51c374bd4aaf4d2cd5c32e537c37f343df6) to understand how to localize for your mailbox language and submit a pull request (see [Contributing](#contributing)), or create an issue.
+
 ## Limitations
 The macro crashes if certain symbols such as the percent sign (%) or backslash (\\) are within a folder name.
 
