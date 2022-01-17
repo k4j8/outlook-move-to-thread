@@ -73,7 +73,7 @@ Public Sub GetConverstationInformation()
                         (sfld <> "Calendar") And _
                         (sfld <> "Auto Replies") And _
                         (InStr(sfld, "Shared Data") = 0) And _
-                    	(InStr(1, ",Caixa de Entrada,Rascunhos,Itens Enviados,", "," & sfld & ",", vbTextCompare) = 0) Then
+                                 (InStr(1, ",Caixa de Entrada,Rascunhos,Itens Enviados,Calendário,Arquivo,", "," & sfld & ",", vbTextCompare) = 0) Then
 
                         ' Make IsInListBox true if folder has already been added
                         IsInListBox = False
@@ -153,7 +153,7 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
                     (sfld <> "Calendar") And _
                     (sfld <> "Auto Replies") And _
                     (InStr(sfld, "Shared Data") = 0) And _
-                    (InStr(1, ",Caixa de Entrada,Rascunhos,Itens Enviados,", "," & sfld & ",", vbTextCompare) = 0) Then
+                    (InStr(1, ",Caixa de Entrada,Rascunhos,Itens Enviados,Calendário,Arquivo,", "," & sfld & ",", vbTextCompare) = 0) Then
 
                     ' Make IsInListBox true if folder has already been added
                     IsInListBox = False
