@@ -13,13 +13,14 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Public Sub UserForm_Initialize()
 
-    GetConverstationInformation
+    GetConversationInformation
 
 End Sub
 
-Public Sub GetConverstationInformation()
+Public Sub GetConversationInformation()
 
     ' Original code obtained from the following site (credit user TimO):
     ' https://stackoverflow.com/questions/29304844/outlook-2010-vba-to-save-selected-email-to-a-folder-other-emails-in-that-convers?rq=1
@@ -47,55 +48,9 @@ Public Sub GetConverstationInformation()
             Dim itemsTable As Outlook.table
             Set itemsTable = theConversation.GetTable
 
-            ' Get the Root Items
-            ' Enumerate the list of items
-            ' Then use a helper method and recursion to walk all the items in the conversation
-            Dim group As Outlook.SimpleItems
-            Set group = theConversation.GetRootItems
-            Dim obj As Object ' an email
-            Dim fld As Outlook.folder ' full path to the folder the email is in (\\AcountName\Folder)
-            Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)
-            Dim IsInListBox As Boolean
-            For Each obj In group
-                If TypeOf obj Is Outlook.MailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
-                    ' If ROOT item is an email, add it to ListBox1
-
-                    Set fld = obj.Parent
-                    FolderPathEncoded = Replace(fld.FolderPath, "%2F", "/")
-                    Debug.Print ("FolderPathEncoded: " & FolderPathEncoded & " (" & TypeName(obj) & ")")
-
-                    ' Don't include generic folders
-                    sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
-                    If (sfld <> "Inbox") And _
-                        (sfld <> "Drafts") And _
-                        (sfld <> "Sent Items") And _
-                        (sfld <> "Calendar") And _
-                        (sfld <> "Auto Replies") And _
-                        (InStr(sfld, "Shared Data") = 0) Then
-
-                        ' Make IsInListBox true if folder has already been added
-                        IsInListBox = False
-                        For i = 0 To Me.ListBox1.ListCount - 1
-                            If Me.ListBox1.Column(0, i) = FolderPathEncoded Then
-                                IsInListBox = True
-                            End If
-                        Next
-
-                        If (IsInListBox = False) Then
-                            Me.ListBox1.AddItem FolderPathEncoded
-                            Debug.Print ("Added " & FolderPathEncoded & " to ListBox")
-                        End If
-
-                    End If
-
-                Else
-                    Debug.Print ("Skipping obj of type " & TypeName(obj))
-                End If
-
-                ' Repeat the process if this email is also a root item
-                GetConversationDetails obj, theConversation
-
-            Next obj
+            ' Start with the Root Items
+            ' Then use recursion to walk all the items in the conversation
+            GetConversationDetails theConversation, theConversation.GetRootItems, ""
         Else
             MsgBox "The currently selected item is not a part of a conversation."
         End If
@@ -118,29 +73,26 @@ Public Sub GetConverstationInformation()
 
 End Sub
 
-Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.conversation)
+Private Sub GetConversationDetails(theConversation As Outlook.conversation, group As Outlook.SimpleItems, indent As String)
 
     ' Original code obtained from the following site (credit user TimO):
     ' https://stackoverflow.com/questions/29304844/outlook-2010-vba-to-save-selected-email-to-a-folder-other-emails-in-that-convers?rq=1
 
     ' From the root items, find all the messages and add to ListBox1
 
-    Dim group As Outlook.SimpleItems
-    Set group = theConversation.GetChildren(anItem)
-
     If group.Count > 0 Then
-        Debug.Print ("Getting conversation details...")
+        Debug.Print (indent & "Getting conversation details...")
         Dim obj As Object ' an email
         Dim fld As Outlook.folder ' full path to the folder the email is in (\\AcountName\Folder)
-        Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)        Dim i As Integer
+        Dim sfld As String ' path to the folder the email is in excluding the account name (\Folder)
         Dim IsInListBox As Boolean
         For Each obj In group
             If TypeOf obj Is Outlook.MailItem Or TypeOf obj Is Outlook.AppointmentItem Or TypeOf obj Is Outlook.MeetingItem Then
-                ' If CHILD item is an email, add it to ListBox1
+                ' If item is an email, add it to ListBox1
 
                 Set fld = obj.Parent
                 FolderPathEncoded = Replace(fld.FolderPath, "%2F", "/")
-                Debug.Print ("  FolderPathEncoded: " & FolderPathEncoded & " (" & TypeName(obj) & ")")
+                Debug.Print (indent & "FolderPathEncoded: " & FolderPathEncoded & " (" & TypeName(obj) & ")")
 
                 ' Don't include generic folders
                 sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
@@ -160,19 +112,19 @@ Private Sub GetConversationDetails(anItem As Object, theConversation As Outlook.
                     Next
 
                     ' Add folder to ListBox if IsInListBox is false
-                    If IsInListBox = False Then
+                    If (IsInListBox = False) Then
                         Me.ListBox1.AddItem FolderPathEncoded
-                        Debug.Print ("  Added " & FolderPathEncoded & " to ListBox")
+                        Debug.Print (indent & "Added " & FolderPathEncoded & " to ListBox")
                     End If
 
                 End If
 
             Else
-                Debug.Print ("  Skipping obj of type " & TypeName(obj))
+                Debug.Print (indent & "Skipping obj of type " & TypeName(obj))
             End If
 
             ' Repeat the process if this email is also a root item
-            GetConversationDetails obj, theConversation
+            GetConversationDetails theConversation, theConversation.GetChildren(obj), indent & "  "
 
         Next obj
     End If
