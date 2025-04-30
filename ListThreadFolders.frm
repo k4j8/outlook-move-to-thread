@@ -95,13 +95,15 @@ Private Sub GetConversationDetails(theConversation As Outlook.conversation, grou
                 Debug.Print (indent & "FolderPathEncoded: " & FolderPathEncoded & " (" & TypeName(obj) & ")")
 
                 ' Don't include generic folders
+                ' Localized to: Portuguese (PT)
                 sfld = Mid(FolderPathEncoded, InStr(3, FolderPathEncoded, "\") + 1)
                 If (sfld <> "Inbox") And _
                     (sfld <> "Drafts") And _
                     (sfld <> "Sent Items") And _
                     (sfld <> "Calendar") And _
                     (sfld <> "Auto Replies") And _
-                    (InStr(sfld, "Shared Data") = 0) Then
+                    (InStr(sfld, "Shared Data") = 0) And _
+                    (InStr(1, ",Caixa de Entrada,Rascunhos,Itens Enviados,Calendário,Arquivo,", "," & sfld & ",", vbTextCompare) = 0) Then
 
                     ' Make IsInListBox true if folder has already been added
                     IsInListBox = False
