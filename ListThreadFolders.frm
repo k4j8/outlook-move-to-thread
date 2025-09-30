@@ -100,6 +100,7 @@ Private Sub GetConversationDetails(theConversation As Outlook.conversation, grou
                 If (sfld <> "Inbox") And _
                     (sfld <> "Drafts") And _
                     (sfld <> "Sent Items") And _
+                    (sfld <> "Meeting Replies") And _
                     (sfld <> "Calendar") And _
                     (sfld <> "Auto Replies") And _
                     (InStr(sfld, "Shared Data") = 0) And _
@@ -214,3 +215,4 @@ GetFolder_Error:
     Exit Function
 
 End Function
+
